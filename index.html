@@ -248,7 +248,7 @@
         }
 
         .btn {
-            padding: 15px 30px;
+            padding: 7px 10px;
             background: linear-gradient(45deg, #ff0000, #8b0000);
             border: none;
             border-radius: 10px;
@@ -334,6 +334,7 @@
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 </head>
 <body>
+    
     <!-- Anti DevTools Protection -->
     <div id="anti-devtools">
         🚫 CUONGDEVGPT: DEVTOOLS DETECTED! ACCESS DENIED!
@@ -448,15 +449,15 @@
         <!-- Input Area -->
         <div class="input-area">
             <textarea id="userInput" placeholder="Nhập câu hỏi của bạn... (Enter để gửi, Shift+Enter để xuống dòng)"></textarea>
-            <button class="btn" onclick="sendMessage()">🚀 Gửi Tin Nhắn</button>
+            <button class="btn" onclick="sendMessage()">🚀 Gửi</button>
         </div>
 
         <!-- Control Buttons -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;">
-            <button class="btn" onclick="downloadCode()">💾 Tải Source Code</button>
             <button class="btn" onclick="clearChat()">🗑️ Xóa Chat</button>
             <button class="btn" onclick="exportChat()">📤 Export Chat History</button>
             <button class="btn" onclick="takeScreenshot()">📸 Chụp Màn Hình</button>
+            <button class="btn" onclick="downloadCode()">🥷 ADMIN </button>
         </div>
     </div>
 
@@ -476,6 +477,7 @@
     </div>
 
     <script>
+       
         // ========== SYSTEM CONFIGURATION ==========
         const ADMIN_IPS = ['171.241.226.149'];
         let apiKeys = [];
@@ -486,7 +488,29 @@
         let systemPrompt = "";
         let isWebPaused = false;
 
-        // ========== SECURITY SYSTEMS ==========
+        // ========== SECURITY SYSTEMS =========
+        const apiKeys = [
+  "AIzaSyCwgM_zb2vkp9RCcazYdd9lNwftryCudGY",
+  "AIzaSyDeQcIq7PC2T1NLA31A0O6t_29VEwer9Ck",
+  "AIzaSyCBWk1O-u5-UXXlJ8zOmQbt-riaJQ_DoAs",
+  "AIzaSyCShVzVC0XzbF8aDmifcM6B34UucD91iIc",
+  "AIzaSyAUvpnpoTRffmvp1To1MQM18zKe_oSsW1E",
+  "AIzaSyBoXLNqpjz52GtMkKAqjFa1Jng-OMAJdY4",
+  "AIzaSyAXEzUg7lVTCul77AiaWApFeUsFaCK0THc",
+  "AIzaSyBwRzeo8UPzX6OC39zH5ZvEcOVRB72s9KY",
+  "AIzaSyBSfk-KCA_ygKTg6TfiR9aNIHTu7OS3ogw"
+];
+       let isWebPaused = false; // giữ trạng thái web
+       function canUseWhenPaused() {
+           if (!isWebPaused) return true;     // web bình thường
+           if (isAdmin) return true;          // admin vẫn dùng được
+           showSecurityAlert('⏸️ Hệ thống đang tạm dừng! Chỉ ADMIN mới có thể sử dụng.');
+           return false;
+}
+// Hàm random chọn key
+       function getRandomApiKey() {
+            return apiKeys[Math.floor(Math.random() * apiKeys.length)];
+}
         // Anti-DevTools Detection
         function initAntiDevTools() {
             setInterval(() => {
@@ -561,6 +585,65 @@
                 return window.originalFetch.apply(this, args);
             };
         }
+        function pauseWeb() {
+            if (!isAdmin) {
+            showSecurityAlert('🚫 Chỉ ADMIN mới có thể tạm dừng hệ thống!');
+            return;
+    }
+
+        isWebPaused = true;
+        const webStatusEl = document.getElementById('webStatus');
+        if (webStatusEl) webStatusEl.textContent = '⏸️ Paused';
+
+        // Overlay chặn user thường
+        let overlay = document.getElementById('pauseOverlay');
+        if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'pauseOverlay';
+        overlay.style.cssText = `
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 11000;
+            display: flex; align-items: center; justify-content: center; color: white;
+            font-size: 18px; text-align: center; padding: 20px;
+        `;
+        overlay.innerHTML = `<div>
+            <div style="font-size:28px;margin-bottom:8px;">⏸️ HỆ THỐNG TẠM DỪNG</div>
+            <div style="opacity:0.9">Chỉ ADMIN mới được sử dụng lúc này.</div>
+        </div>`;
+        document.body.appendChild(overlay);
+    }
+
+    // Disable tất cả input/nút cho user thường
+    document.querySelectorAll('button, input, textarea, select').forEach(el => {
+        if (!isAdmin) {
+            el.dataset._wasDisabled = el.disabled ? '1' : '0';
+            el.disabled = true;
+            el.classList.add('paused-disabled');
+        }
+    });
+
+    showSecurityAlert('⏸️ Hệ thống đã tạm dừng. Chỉ ADMIN có thể hoạt động.');
+}
+        function restartWeb() {
+            if (!isAdmin) {
+            showSecurityAlert('🚫 Chỉ ADMIN mới có thể khởi động lại hệ thống!');
+            return;
+    }
+
+        isWebPaused = false;
+        const webStatusEl = document.getElementById('webStatus');
+        if (webStatusEl) webStatusEl.textContent = '🟢 Online';
+
+        const overlay = document.getElementById('pauseOverlay');
+        if (overlay) overlay.remove();
+
+        document.querySelectorAll('.paused-disabled').forEach(el => {
+            if (el.dataset && el.dataset._wasDisabled === '0') el.disabled = false;
+            el.classList.remove('paused-disabled');
+            delete el.dataset._wasDisabled;
+    });
+
+        showSecurityAlert('🔄 Hệ thống đã khởi động lại!');
+}
 
         // Anti-CURL Protection
         function initAntiCURL() {
@@ -574,8 +657,8 @@
             if (isAdmin) return true;
             if (!requestCount[userIP]) requestCount[userIP] = 0;
             
-            if (requestCount[userIP] >= 20) {
-                showSecurityAlert('Rate limit exceeded! Maximum 20 requests per hour.');
+            if (requestCount[userIP] >= 10) {
+                showSecurityAlert('Rate limit exceeded! Maximum 10 requests per hour.');
                 return false;
             }
             
@@ -793,11 +876,8 @@ function resetRateLimit() {
 
 // ========== CHAT SYSTEM ==========
 async function sendMessage() {
-    if (isWebPaused) {
-        showSecurityAlert('⏸️ Hệ thống đang tạm dừng!');
-        return;
-    }
-    
+    if (!canUseWhenPaused()) return;
+     
     if (!checkRateLimit()) return;
     
     const userInput = document.getElementById('userInput').value.trim();
@@ -811,12 +891,12 @@ async function sendMessage() {
 
     // Build request content
     let requestContent = "";
-    let currentApiKey = apiKeys.length > 0 ? apiKeys[0] : 'demo-key';
+    let currentApiKey = getRandomApiKey();  // dùng random key
     
     if (isFirstMessage) {
         requestContent = systemPrompt + "\n\nCâu hỏi đầu tiên: " + userInput;
         isFirstMessage = false;
-        showSecurityAlert('📤 Đã gửi prompt hệ thống!');
+        showSecurityAlert('📤 Đã gửi yêu cầu kích hoạt!');
     } else {
         requestContent = "Câu hỏi tiếp theo: " + userInput;
     }
@@ -880,9 +960,27 @@ function addMessage(text, sender) {
                 // Regular text
                 formattedText += codeBlocks[i].replace(/\n/g, '<br>');
             } else {
-                // Code block
+                // codeBlocks[i] có thể bắt đầu bằng "py\n" hoặc "js\n" => tách lang nếu có
+                let codeContent = codeBlocks[i].replace(/\r/g, '');
+                let lang = 'txt';
+
+                // Tìm tag ngôn ngữ ở đầu block: ví dụ "py\n"
+                const langMatch = codeContent.match(/^\s*([a-zA-Z0-9+\-]+)\s*\n/);
+                if (langMatch) {
+                    lang = langMatch[1].toLowerCase();
+                    codeContent = codeContent.replace(/^\s*[a-zA-Z0-9+\-]+\s*\n/, '');
+                } else {
+                    // Fallback: đoán bằng nội dung (case-insensitive)
+                    const trimmed = codeContent.trim();
+                    if (/^\s*<!doctype\s+html/i.test(trimmed) || /^\s*<html/i.test(trimmed)) lang = 'html';
+                    else if (/(^|\n)\s*def\s+\w+\s*\(|\bimport\s+/im.test(codeContent)) lang = 'py';
+                    else if (/function\s+\w+|\bconsole\.log\b|=>/im.test(codeContent)) lang = 'js';
+                    else if (/^[\s\S]*\{[\s\S]*\}[\s\S]*/.test(codeContent) && /\.[a-zA-Z0-9_-]+\s*\{/.test(codeContent)) lang = 'css';
+                }
+
+                // Tạo block HTML với data-lang để download dễ lấy ext
                 formattedText += `
-                    <div style="
+                    <div class="code-block" data-lang="${lang}" style="
                         background: #1a1a1a; 
                         padding: 15px; 
                         border-radius: 5px; 
@@ -891,11 +989,11 @@ function addMessage(text, sender) {
                         position: relative;
                         overflow-x: auto;
                     ">
-                        <pre style="margin: 0; font-family: 'Courier New', monospace; color: #00ff00; font-size: 12px; white-space: pre-wrap;">${codeBlocks[i]}</pre>
+                        <pre style="margin: 0; font-family: 'Courier New', monospace; color: #00ff00; font-size: 12px; white-space: pre-wrap;">${escapeHtml(codeContent)}</pre>
                         <button onclick="copyCode(this)" style="
                             position: absolute; 
                             top: 5px; 
-                            right: 5px; 
+                            right: 80px; 
                             background: #ff0000; 
                             border: none; 
                             color: white; 
@@ -904,6 +1002,18 @@ function addMessage(text, sender) {
                             cursor: pointer; 
                             font-size: 10px;
                         ">📋 Copy</button>
+                        <button onclick="downloadCode(this)" style="
+                            position: absolute; 
+                            top: 5px; 
+                            right: 5px; 
+                            background: #00aa00; 
+                            border: none; 
+                            color: white; 
+                            padding: 5px 10px; 
+                            border-radius: 3px; 
+                            cursor: pointer; 
+                            font-size: 10px;
+                        ">⬇️ Download</button>
                     </div>
                 `;
             }
@@ -918,15 +1028,67 @@ function addMessage(text, sender) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+// Helper: escape HTML để tránh inject khi chèn vào <pre>
+function escapeHtml(str) {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
 function copyCode(button) {
-    const code = button.parentElement.querySelector('pre').textContent;
+    // lấy code thô từ pre (unescape)
+    const pre = button.parentElement.querySelector('pre');
+    const code = pre.textContent; // textContent trả chuỗi chưa escape -> chính xác
     navigator.clipboard.writeText(code).then(() => {
         showSecurityAlert('✅ Đã copy code vào clipboard!');
+    }).catch(()=> {
+        showSecurityAlert('❌ Copy thất bại!');
     });
 }
 
-// ========== FILE UPLOAD SYSTEM ==========
+function downloadCode(button) {
+    const container = button.closest('.code-block') || button.parentElement;
+    const pre = container.querySelector('pre');
+    const code = pre.textContent;
+
+    // lấy lang từ data-lang nếu có
+    let lang = (container.dataset.lang || 'txt').toLowerCase();
+
+    // map một số alias sang ext
+    const extMap = {
+        'python':'py', 'py':'py',
+        'html':'html', 'htm':'html',
+        'javascript':'js', 'js':'js',
+        'css':'css',
+        'json':'json',
+        'txt':'txt'
+    };
+    let ext = extMap[lang] || 'txt';
+
+    // Nếu lang ko rõ, thử đoán nhanh bằng code
+    if (ext === 'txt') {
+        if (/^\s*<!doctype\s+html/i.test(code) || /^\s*<html/i.test(code)) ext = 'html';
+        else if (/(^|\n)\s*def\s+\w+\s*\(|\bimport\s+/im.test(code)) ext = 'py';
+        else if (/function\s+\w+|\bconsole\.log\b|=>/im.test(code)) ext = 'js';
+    }
+
+    const blob = new Blob([code], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cuongdev.${ext}`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+    showSecurityAlert(`⬇️ Đã tải file cuongdev.${ext}`);
+}
+
 async function uploadFile() {
+    if (!canUseWhenPaused()) 
+    return;
+    
     const fileInput = document.getElementById('fileInput');
     const userPrompt = document.getElementById('userInput').value.trim();
     if (!fileInput.files.length) {
@@ -939,8 +1101,9 @@ async function uploadFile() {
     }
 
     const file = fileInput.files[0];
-    const apiKey = apiKeys.length > 0 ? apiKeys[0] : "YOUR_API_KEY";
-
+    const apiKey = getRandomApiKey();  // dùng random key
+    
+    
     try {
         // 1. Upload file
         const formData = new FormData();
@@ -992,7 +1155,7 @@ async function uploadFile() {
 let currentSongIndex = 0;
 let isPlaying = false;
 const musicFiles = ['nhac1.mp3', 'nhac2.mp3', 'nhac3.mp3', 'nhac4.mp3', 'nhac5.mp3'];
-
+*
 function toggleMusicPlayer() {
     const player = document.getElementById('musicPlayer');
     const isVisible = player.style.display !== 'none';
@@ -1114,7 +1277,7 @@ function newChat() {
         document.getElementById('chatBox').innerHTML = `
             <div class="message bot-message">
                 💬 <strong>Chat mới đã được tạo!</strong><br>
-                • Prompt sẽ được gửi lại ở tin nhắn đầu tiên<br>
+                • YÊU CẦU ĐÃ ĐC GỬI <br>
                 • IP: ${userIP}<br>
                 • Hỏi gì đi thằng ngu! Tao xử lý hết!<br>
                 <span class="message-time">${new Date().toLocaleTimeString('vi-VN')}</span>
@@ -1128,7 +1291,7 @@ function newChat() {
 
 function resetPrompt() {
     isFirstMessage = true;
-    addMessage('🔄 Prompt đã được reset! Tin nhắn tiếp theo sẽ gửi prompt mới.', 'bot');
+    addMessage('🔄 Yêu cầu đã được reset! Tin nhắn tiếp theo sẽ gửi yêu cầu mới.', 'bot');
 }
 
 function clearChat() {
@@ -1172,15 +1335,7 @@ function exportChat() {
 }
 
 function downloadCode() {
-    const htmlContent = document.documentElement.outerHTML;
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cuongdevgpt_complete_system.html';
-    a.click();
-    URL.revokeObjectURL(url);
+    window.location.href = "http://t.me/truongphuhaokhithaylonquenloi";
 }
 
 function takeScreenshot() {
@@ -1275,11 +1430,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Initialize music progress bar
-document.getElementById('bgMusic').addEventListener('timeupdate', function() {
-    const audio = this;
-    const progress = document.getElementById('musicProgress');
-    const percentage = (audio.currentTime / audio.duration) * 100;
-    progress.style.width = percentage + '%';
+document.addEventListener("click", () => {
+    const audio = document.getElementById("bgMusic");
+    if (audio.paused) {
+        audio.play().catch(err => console.log("Autoplay blocked:", err));
+    }
 });
     </script>
 
